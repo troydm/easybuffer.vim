@@ -1,0 +1,72 @@
+easybuffer.vim for Vim version 7.0+   Last change: 9 September, 2012
+
+Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
+Version: 0.1
+Description: easybuffer.vim is a simple plugin to quickly
+switch between buffers by just pressing keys 
+Last Change: 9 September, 2012
+License: Vim License (see :help license)
+Website: https://github.com/troydm/easybuffer.vim
+
+Help on using easybuffer.vim                                     *easybuffer.vim*
+
+1. Introduction                    |easybuffer.vim-intro|
+2. Configuration                   |easybuffer.vim-configuration|
+2. Usage                           |easybuffer.vim-usage|
+
+============================================================================================
+ 1. INTRODUCTION                                                  *easybuffer.vim-intro*
+
+easybuffer.vim - is a simple plugin to quickly switch between buffers using corresponding
+keys or buffer numbers displayed in easybuffer quick switch window  
+
+Platform: 
+    only unix based operating systems are supported, might work on Windows too
+
+============================================================================================
+ 2. CONFIGURATION                                        *easybuffer.vim-configuration*
+
+                                                         *g:easybuffer_chars*
+g:easybuffer_chars     (Default: ['a','s','f','q','w','e','z','x','c','v'] )
+    List of characters to use as a key switching characters
+    Note: you can't use uppercase letters and 'r' and 'd' letters as switch characters
+
+============================================================================================
+ 2. USAGE                                                         *easybuffer.vim-usage*
+
+                                                                  *EasyBuffer*
+:EasyBuffer[!]
+    Opens an quick switch buffer in current window
+    If [!] is specified shows unlisted buffers too
+    To switch to another buffer just press the corresponding key or buffer number
+    If first key sequence pressed matches more than one buffer you can finish 
+    key sequence by pressing <Enter> key
+    For example you have following buffers in quick switch:
+        <Key> <BufNr> <Mode>  <BufName>
+          a     1      #a     buffer1
+          aa    2       h     buffer2
+          as    3       u=    buffer3
+    To switch to a buffer just press a and then press <Enter> to complete key sequence 
+    Same rule applies to using buffer number key sequences
+    To delete buffer move your cursor to the line corresponding to that buffer and press d 
+    To wipeout buffer move your cursor to the line corresponding to that buffer and press D 
+    To refresh current buffer list just press R
+    To quickly go to line corresponding to some buffer press same key sequnce only in uppercase
+
+                                                                  *EasyBufferHorizontal*
+:EasyBufferHorizontal[!]
+    Same as |EasyBuffer| only displays quick switch buffer in a new horizontal window
+
+                                                                  *EasyBufferHorizontalBelow*
+:EasyBufferHorizontalBelow[!]
+    Same as |EasyBuffer| only displays quick switch buffer in a new horizontal window below
+
+                                                                  *EasyBufferVertical*
+:EasyBufferVertical[!]
+    Same as |EasyBuffer| only displays quick switch buffer in a new vertical window 
+
+                                                                  *EasyBufferVerticalRight*
+:EasyBufferVerticalRight[!]
+    Same as |EasyBuffer| only displays quick switch buffer in a new vertical window on right
+
+ vim:tw=78:ts=8:ft=help:norl:
