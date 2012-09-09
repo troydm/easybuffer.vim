@@ -5,7 +5,7 @@
 " switch between buffers by just pressing keys 
 " Last Change: 9 September, 2012
 " License: Vim License (see :help license)
-" Website: https://github.com/troydm/asyncfinder.vim
+" Website: https://github.com/troydm/easybuffer.vim
 "
 " See easybuffer.vim for help.  This can be accessed by doing:
 " :help easybuffer
