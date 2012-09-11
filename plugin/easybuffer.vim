@@ -21,6 +21,16 @@ if !exists("g:easybuffer_bufname")
     let g:easybuffer_bufname = "bname"
 endif
 
+" check for available command
+let g:easybuffer_keep = ''
+if exists(":keepalt")
+    let g:easybuffer_keep .= 'keepalt '
+endif
+
+if exists(":keepjumps")
+    let g:easybuffer_keep .= 'keepjumps '
+endif
+
 function! s:StrCenter(s,l)
     if len(a:s) > a:l
         return a:s
@@ -50,7 +60,7 @@ function! s:SelectBuf(bnr)
     endif
     let prevbnr = getbufvar('%','prevbnr') 
     if bufnr('%') != prevbnr
-        exe 'keepalt keepjumps '.prevbnr.'buffer'
+        exe g:easybuffer_keep.prevbnr.'buffer'
     endif
     if prevbnr != a:bnr
         exe ''.a:bnr.'buffer'
@@ -320,18 +330,18 @@ function! s:OpenEasyBuffer(bang,win)
             exe 'nnoremap <buffer> '.toupper(k)." :echo '' \\| call <SID>KeyPressed('".toupper(k)."')<CR>"
         endfor
     else
-        exe 'keepjumps '.winnr . 'wincmd w'
+        exe g:easybuffer_keep.winnr . 'wincmd w'
         call setbufvar('%','win',a:win)
         call setbufvar('%','unlisted',unlisted)
         call s:Refresh()
     endif
 endfunction
 
-command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt drop')
-command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt '.(&lines/2).'sp')
-command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt belowright '.(&lines/2).'sp')
-command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt '.(&columns/2).'vs')
-command! -bang EasyBufferVerticalRight call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt belowright '.(&columns/2).'vs')
+command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'drop')
+command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&lines/2).'sp')
+command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&lines/2).'sp')
+command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&columns/2).'vs')
+command! -bang EasyBufferVerticalRight call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&columns/2).'vs')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
