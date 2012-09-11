@@ -1,9 +1,9 @@
 " easybuffer.vim - plugin to quickly switch between buffers
 " Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-" Version: 0.1
+" Version: 0.1.1
 " Description: easybuffer.vim is a simple plugin to quickly
 " switch between buffers by just pressing keys 
-" Last Change: 9 September, 2012
+" Last Change: 11 September, 2012
 " License: Vim License (see :help license)
 " Website: https://github.com/troydm/easybuffer.vim
 "
@@ -15,6 +15,10 @@ set cpo&vim
 
 if !exists("g:easybuffer_chars")
     let g:easybuffer_chars = ['a','s','f','q','w','e','z','x','c','v']
+endif
+
+if !exists("g:easybuffer_bufname")
+    let g:easybuffer_bufname = "bname"
 endif
 
 function! s:StrCenter(s,l)
@@ -31,16 +35,31 @@ function! s:StrCenter(s,l)
         return s
 endfunction
 
+function! s:StrRight(s,l)
+    if len(a:s) > a:l
+        return a:s
+    else
+        let i = (a:l - len(a:s))
+        let s = a:s.repeat(' ',i)
+        return s
+endfunction
+
 function! s:SelectBuf(bnr)
-    if !(getbufvar('%','win') =~ ' edit')
+    if !(getbufvar('%','win') =~ ' drop')
         bwipeout!
     endif
-    exe ''.a:bnr.'buffer'
+    let prevbnr = getbufvar('%','prevbnr') 
+    if bufnr('%') != prevbnr
+        exe 'keepalt keepjumps '.prevbnr.'buffer'
+    endif
+    if prevbnr != a:bnr
+        exe ''.a:bnr.'buffer'
+    endif
 endfunction
 
 function! s:DelBuffer()
     if line('.') > 2
-        let bnr = str2nr(split(getline('.'),'\s\+')[1])
+        let bnr = str2nr(split(getline('.'),'\s\+')[0])
         if bufexists(bnr)
             if !getbufvar(bnr, "&modified")
                 exe ''.bnr.'bdelete'
@@ -58,7 +77,7 @@ endfunction
 
 function! s:WipeoutBuffer()
     if line('.') > 2
-        let bnr = str2nr(split(getline('.'),'\s\+')[1])
+        let bnr = str2nr(split(getline('.'),'\s\+')[0])
         if bufexists(bnr)
             exe ''.bnr.'bwipeout!'
             setlocal modifiable
@@ -73,7 +92,7 @@ endfunction
 function! s:GotoBuffer(bnr)
     if line('$') > 2
         for i in range(3,line('$'))
-            let bnr = str2nr(split(getline(i),'\s\+')[1])
+            let bnr = str2nr(split(getline(i),'\s\+')[0])
             if bnr == a:bnr
                 exe 'normal! '.i.'G0^'
                 break
@@ -118,7 +137,7 @@ function! s:EnterPressed()
         let input = ''
         call setbufvar('%','inputn',input)
     elseif line('.') > 2
-        let bnr = str2nr(split(getline('.'),'\s\+')[1])
+        let bnr = str2nr(split(getline('.'),'\s\+')[0])
         call s:SelectBuf(bnr)
     endif
 endfunction
@@ -178,13 +197,19 @@ endfunction
 
 function! s:ListBuffers(unlisted)
     call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
-    call append(1,'<Key> <BufNr> <Mode>  <Filetype>  <BufName>')
     let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val)")
     if !a:unlisted
         let bnrlist = filter(bnrlist, "buflisted(v:val)")
     endif
     let keydict = {}
     call setbufvar('%','bnrlist',bnrlist)
+    let maxftwidth = 10
+    for bnr in bnrlist
+        if len(getbufvar(bnr,'&filetype')) > maxftwidth
+            let maxftwidth = len(getbufvar(bnr,'&filetype'))
+        endif
+    endfor
+    call append(1,'<BufNr> <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
     for bnr in bnrlist
         let key = ''
         let keyok = 0
@@ -228,8 +253,7 @@ function! s:ListBuffers(unlisted)
         endif
         if bufwinnr('%') == bufwinnr(bnr)
             let mode .= '%'
-        endif
-        if bufnr('#') == bnr
+        elseif bufnr('#') == bnr
             let mode .= '#'
         endif
         if winbufnr(bufwinnr(bnr)) == bnr
@@ -239,23 +263,23 @@ function! s:ListBuffers(unlisted)
         endif
         if !getbufvar(bnr, "&modifiable")
             let mode .= '-'
-        endif
-        if getbufvar(bnr, "&readonly")
+        elseif getbufvar(bnr, "&readonly")
             let mode .= '='
         endif
         if getbufvar(bnr, "&modified")
             let mode .= '+'
         endif
-        let mode = s:StrCenter(mode,6)
-        if len(bufname(bnr)) > 0
-            let bname = expand('#'.bnr.':t').'  '.expand('#'.bnr.':p')
-            let bufft = s:StrCenter(getbufvar(bnr,'&filetype'),10)
+        let mode = ' '.s:StrRight(mode,5)
+        let bname = bufname(bnr)
+        if len(bname) > 0
+            let bname = eval(g:easybuffer_bufname)
+            let bufft = s:StrCenter(getbufvar(bnr,'&filetype'),maxftwidth)
         else
             let bname = '[No Name]'
-            let bufft = s:StrCenter('-',10)
+            let bufft = s:StrCenter('-',maxftwidth)
         endif
         if bufft != 'easybuffer'
-            call append(line('$'),key.' '.bnrs.' '.mode.'  '.bufft.'  '.bname)
+            call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
         endif
     endfor
     call setbufvar('%','keydict',keydict)
@@ -269,6 +293,7 @@ function! s:Refresh()
 endfunction
 
 function! s:OpenEasyBuffer(bang,win)
+    let prevbnr = bufnr('%')
     let winnr = bufwinnr('^easybuffer$')
     let unlisted = 0
     if a:bang == '!'
@@ -277,6 +302,7 @@ function! s:OpenEasyBuffer(bang,win)
     if winnr < 0
         execute a:win . ' easybuffer'
         setlocal filetype=easybuffer buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
+        call setbufvar('%','prevbnr',prevbnr)
         call setbufvar('%','win',a:win)
         call setbufvar('%','unlisted',unlisted)
         call s:ListBuffers(unlisted)
@@ -301,11 +327,11 @@ function! s:OpenEasyBuffer(bang,win)
     endif
 endfunction
 
-command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>','keepalt keepjumps edit')
-command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>','keepalt keepjumps '.(&lines/2).'sp')
-command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>','keepalt keepjumps belowright '.(&lines/2).'sp')
-command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>','keepalt keepjumps '.(&columns/2).'vs')
-command! -bang EasyBufferVerticalRight call <SID>OpenEasyBuffer('<bang>','keepalt keepjumps belowright '.(&columns/2).'vs')
+command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt drop')
+command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt '.(&lines/2).'sp')
+command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt belowright '.(&lines/2).'sp')
+command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt '.(&columns/2).'vs')
+command! -bang EasyBufferVerticalRight call <SID>OpenEasyBuffer('<bang>','keepjumps keepalt belowright '.(&columns/2).'vs')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

@@ -1,9 +1,9 @@
 " easybuffer.vim - plugin to quickly switch between buffers
 " Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-" Version: 0.1
+" Version: 0.1.1
 " Description: easybuffer.vim is a simple plugin to quickly
 " switch between buffers by just pressing keys 
-" Last Change: 9 September, 2012
+" Last Change: 11 September, 2012
 " License: Vim License (see :help license)
 " Website: https://github.com/troydm/easybuffer.vim
 "
@@ -29,14 +29,30 @@ syntax match EasyBufferColumn /<\zsFiletype\ze>/
 syntax match EasyBufferColumn /<\zsBufName\ze>/ 
 syntax match EasyBufferColumn /<\zsKey\ze>/ 
 syntax match EasyBufferColumn /<\zsMode\ze>/ 
-syntax match EasyBufferKey /^\s\+\S\+\s/ 
-syntax match EasyBufferBufNr /\s\d\+\s/ 
+syntax match EasyBufferBufNr /\d\+/ contained 
+syntax match EasyBufferKey /\l\+/ contained
+syntax match EasyBufferKeyBufNr /^\s*\d\+\s\+\S\+\s/ contains=EasyBufferBufNr,EasyBufferKey
+syntax match EasyBufferModeUnlisted /u/ contained
+syntax match EasyBufferModeCurrent /[%#]/ contained 
+syntax match EasyBufferModeActive /a/ contained 
+syntax match EasyBufferModeHidden /h/ contained 
+syntax match EasyBufferModeModifiable /-/ contained 
+syntax match EasyBufferModeReadonly /=/ contained 
+syntax match EasyBufferModeModified /+/ contained 
+syntax match EasyBufferMode /\s\+u\?[%#]\?[ah][=-]\?+\?\s\+/ contains=EasyBufferModeUnlisted,EasyBufferModeCurrent,EasyBufferModeActive,EasyBufferModeHidden,EasyBufferModeModified,EasyBufferModeModifiable,EasyBufferModeReadonly
 
 highlight default link EasyBufferTitle   Comment
 highlight default link EasyBufferComment Constant
 highlight default link EasyBufferColumn  String
+highlight default link EasyBufferBufNr   Constant
 highlight default link EasyBufferKey     Identifier
-highlight default link EasyBufferBufNr   Identifier
+highlight default link EasyBufferModeUnlisted  Constant  
+highlight default link EasyBufferModeCurrent   Character  
+highlight default link EasyBufferModeActive    String  
+highlight default link EasyBufferModeHidden    Number  
+highlight default link EasyBufferModeModifiable  Operator  
+highlight default link EasyBufferModeReadonly    Character  
+highlight default link EasyBufferModeModified    Function  
 
 let b:current_syntax = "easybuffer"
 
