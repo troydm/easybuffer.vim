@@ -55,7 +55,7 @@ function! s:StrRight(s,l)
 endfunction
 
 function! s:SelectBuf(bnr)
-    if !(getbufvar('%','win') =~ ' drop')
+    if !(getbufvar('%','win') =~ ' edit')
         bwipeout!
     endif
     let prevbnr = getbufvar('%','prevbnr') 
@@ -337,7 +337,7 @@ function! s:OpenEasyBuffer(bang,win)
     endif
 endfunction
 
-command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'drop')
+command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
 command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&lines/2).'sp')
 command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&lines/2).'sp')
 command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&columns/2).'vs')
