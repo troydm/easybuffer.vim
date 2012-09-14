@@ -1,9 +1,9 @@
 " easybuffer.vim - plugin to quickly switch between buffers
 " Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-" Version: 0.1.1
+" Version: 0.1.2
 " Description: easybuffer.vim is a simple plugin to quickly
 " switch between buffers by just pressing keys 
-" Last Change: 11 September, 2012
+" Last Change: 15 September, 2012
 " License: Vim License (see :help license)
 " Website: https://github.com/troydm/easybuffer.vim
 "
@@ -112,8 +112,22 @@ function! s:GotoBuffer(bnr)
 endfunction
 
 function! s:ClearInput()
+    match none
     call setbufvar('%','inputn','')
     call setbufvar('%','inputk','')
+endfunction
+
+function! s:HighlightNotMatchedBnr(bnrs)
+    let p = ''
+    let i = 0
+    if len(a:bnrs) == 0 | return | endif
+    for bnr in a:bnrs
+        if i != 0 | let p .= '\|' | endif
+        let p .= ''.bnr
+        let i += 1
+    endfor
+    let p = '/^\s*\('.p.'\)\s.*$/'
+    exe 'match EasyBufferDisabled '.p
 endfunction
 
 function! s:EnterPressed()
@@ -125,30 +139,43 @@ function! s:EnterPressed()
         for k in keys(keydict)
             if k == inputkl
                 if char2nr(inputk[len(inputk)-1]) == char2nr(inputkl[len(inputkl)-1])
+                    match none
                     call s:SelectBuf(keydict[k])
                 else
                     let inputk = ''
+                    match none
                     call setbufvar('%','inputk',inputk)
+                    call setbufvar('%','inputn',inputk)
                     call s:GotoBuffer(keydict[k])
                 endif
                 return
             endif
         endfor
         let inputk = ''
-        call setbufvar('%','inputk',input)
+        match none
+        call setbufvar('%','inputk',inputk)
+        call setbufvar('%','inputn','')
     elseif !empty(input)
         let bnrlist = getbufvar('%','bnrlist')
         for bnr in bnrlist
             if (''.bnr) == input
+                match none
                 call s:SelectBuf(bnr)
                 return
             endif
         endfor
         let input = ''
+        match none
         call setbufvar('%','inputn',input)
+        call setbufvar('%','inputk','')
     elseif line('.') > 2
         let bnr = str2nr(split(getline('.'),'\s\+')[0])
+        match none
         call s:SelectBuf(bnr)
+    else
+        match none
+        call setbufvar('%','inputn','')
+        call setbufvar('%','inputk','')
     endif
 endfunction
 
@@ -158,18 +185,24 @@ function! s:KeyPressed(k)
     let keydict = getbufvar('%','keydict')
     let matches = 0
     let matchedk = 0
+    let notmatchedbnr = []
     for k in keys(keydict)
         if match(k,inputl) != -1
             let matches += 1
             let matchedk = k
+        else
+            call add(notmatchedbnr,keydict[k])
         endif
     endfor
     if matches == 1
         if char2nr(input[len(input)-1]) == char2nr(inputl[len(inputl)-1])
+            match none
             call s:SelectBuf(keydict[matchedk])
         else
             let input = ''
+            match none
             call setbufvar('%','inputk',input)
+            call setbufvar('%','inputn',input)
             call s:GotoBuffer(keydict[matchedk])
         endif
         return
@@ -177,9 +210,13 @@ function! s:KeyPressed(k)
         let input = ''
     endif
     if len(input) > 0
+        call s:HighlightNotMatchedBnr(notmatchedbnr)
         echo 'select key: '.input
+    else
+        match none
     endif
     call setbufvar('%','inputk',input)
+    call setbufvar('%','inputn','')
 endfunction
 
 function! s:NumberPressed(n)
@@ -187,27 +224,35 @@ function! s:NumberPressed(n)
     let bnrlist = getbufvar('%','bnrlist')
     let matches = 0
     let matchedbnr = 0
+    let notmatchedbnr = []
     for bnr in bnrlist
         if match(''.bnr,input) != -1
             let matches += 1
             let matchedbnr = bnr
+        else
+            call add(notmatchedbnr,bnr)
         endif
     endfor
     if matches == 1
+        match none
         call s:SelectBuf(matchedbnr)
         return
     elseif matches == 0
         let input = ''
     endif
     if len(input) > 0
+        call s:HighlightNotMatchedBnr(notmatchedbnr)
         echo 'select bufnr: '.input
+    else
+        match none
     endif
     call setbufvar('%','inputn',input)
+    call setbufvar('%','inputk','')
 endfunction
 
 function! s:ListBuffers(unlisted)
     call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
-    let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val)")
+    let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val) && getbufvar(v:val,'&filetype') != 'easybuffer'")
     if !a:unlisted
         let bnrlist = filter(bnrlist, "buflisted(v:val)")
     endif
@@ -290,11 +335,10 @@ function! s:ListBuffers(unlisted)
             let bname = '[No Name]'
             let bufft = s:StrCenter('-',maxftwidth)
         endif
-        if bufft != 'easybuffer'
-            call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
-        endif
+        call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
     endfor
     call setbufvar('%','keydict',keydict)
+    match none
 endfunction
 
 function! s:Refresh()

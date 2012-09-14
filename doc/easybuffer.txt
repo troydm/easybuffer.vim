@@ -1,10 +1,10 @@
-easybuffer.vim for Vim version 7.0+   Last change: 11 September, 2012
+easybuffer.vim for Vim version 7.0+   Last change: 15 September, 2012
 
 Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-Version: 0.1.1
+Version: 0.1.2
 Description: easybuffer.vim is a simple plugin to quickly
 switch between buffers by just pressing keys 
-Last Change: 11 September, 2012
+Last Change: 15 September, 2012
 License: Vim License (see :help license)
 Website: https://github.com/troydm/easybuffer.vim
 
