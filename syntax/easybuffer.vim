@@ -40,6 +40,9 @@ syntax match EasyBufferModeModifiable /-/ contained
 syntax match EasyBufferModeReadonly /=/ contained 
 syntax match EasyBufferModeModified /+/ contained 
 syntax match EasyBufferMode /\s\+u\?[%#]\?[ah][=-]\?+\?\s\+/ contains=EasyBufferModeUnlisted,EasyBufferModeCurrent,EasyBufferModeActive,EasyBufferModeHidden,EasyBufferModeModified,EasyBufferModeModifiable,EasyBufferModeReadonly
+syntax match EasyBufferFile /\S\+\s\+\S\+$/ contains=EasyBufferFileType,EasyBufferFileName
+syntax match EasyBufferFileType /\zs[^\s>]\+\ze\s\+/ contained
+syntax match EasyBufferFileName /[ /]\zs[^ />]\+\ze$/ contained
 
 highlight default link EasyBufferTitle   Comment
 highlight default link EasyBufferComment Constant
@@ -53,6 +56,8 @@ highlight default link EasyBufferModeHidden    Number
 highlight default link EasyBufferModeModifiable  Operator  
 highlight default link EasyBufferModeReadonly    Character  
 highlight default link EasyBufferModeModified    Function  
+highlight default link EasyBufferFileType        Type  
+highlight default link EasyBufferFileName        Keyword  
 
 let b:current_syntax = "easybuffer"
 

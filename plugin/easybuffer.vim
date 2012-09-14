@@ -283,7 +283,9 @@ function! s:ListBuffers(unlisted)
         let bname = bufname(bnr)
         if len(bname) > 0
             let bname = eval(g:easybuffer_bufname)
-            let bufft = s:StrCenter(getbufvar(bnr,'&filetype'),maxftwidth)
+            let bufft = getbufvar(bnr,'&filetype')
+            if empty(bufft) | let bufft = '-' | endif
+            let bufft = s:StrCenter(bufft,maxftwidth)
         else
             let bname = '[No Name]'
             let bufft = s:StrCenter('-',maxftwidth)
