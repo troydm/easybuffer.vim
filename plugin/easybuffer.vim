@@ -262,6 +262,7 @@ function! s:ListBuffers(unlisted)
     endif
     let keydict = {}
     call setbufvar('%','bnrlist',bnrlist)
+    let prevbnr = getbufvar('%','prevbnr') 
     let maxftwidth = 10
     for bnr in bnrlist
         if len(getbufvar(bnr,'&filetype')) > maxftwidth
@@ -340,6 +341,9 @@ function! s:ListBuffers(unlisted)
             let bufft = s:StrCenter('-',maxftwidth)
         endif
         call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
+		if (bnr == prevbnr)
+			call cursor(line('$'),0)
+		endif
     endfor
     call setbufvar('%','keydict',keydict)
     match none
