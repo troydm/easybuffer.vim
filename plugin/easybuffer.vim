@@ -21,6 +21,10 @@ if !exists("g:easybuffer_bufname")
     let g:easybuffer_bufname = "bname"
 endif
 
+if !exists("g:easybuffer_cursorline")
+    let g:easybuffer_cursorline = 1
+endif
+
 " check for available command
 let g:easybuffer_keep = ''
 if exists(":keepalt")
@@ -258,6 +262,7 @@ function! s:ListBuffers(unlisted)
     endif
     let keydict = {}
     call setbufvar('%','bnrlist',bnrlist)
+    let prevbnr = getbufvar('%','prevbnr') 
     let maxftwidth = 10
     for bnr in bnrlist
         if len(getbufvar(bnr,'&filetype')) > maxftwidth
@@ -336,6 +341,9 @@ function! s:ListBuffers(unlisted)
             let bufft = s:StrCenter('-',maxftwidth)
         endif
         call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
+        if (bnr == prevbnr)
+            call cursor(line('$'),0)
+        endif
     endfor
     call setbufvar('%','keydict',keydict)
     match none
@@ -356,6 +364,7 @@ function! s:OpenEasyBuffer(bang,win)
         let unlisted = 1
     endif
     if winnr < 0
+    set hidden "set hidden allows unsaved buffers
         execute a:win . ' easybuffer'
         setlocal filetype=easybuffer buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
         call setbufvar('%','prevbnr',prevbnr)
@@ -363,6 +372,9 @@ function! s:OpenEasyBuffer(bang,win)
         call setbufvar('%','unlisted',unlisted)
         call s:ListBuffers(unlisted)
         setlocal nomodifiable
+        if exists("g:easybuffer_cursorline")
+            setlocal cursorline
+        endif
         nnoremap <buffer> <Esc> :echo '' \| call <SID>ClearInput()<CR>
         nnoremap <buffer> d :echo '' \| call <SID>DelBuffer()<CR>
         nnoremap <buffer> D :echo '' \| call <SID>WipeoutBuffer()<CR>
@@ -383,7 +395,31 @@ function! s:OpenEasyBuffer(bang,win)
     endif
 endfunction
 
+function! s:CloseEasyBuffer() 
+    let prevbnr = getbufvar('%','prevbnr')
+    if (prevbnr == -1)
+        if (winnr("$") > 1) 
+            close
+        else
+            echomsg "Cannot close last window"
+        endif
+    else
+        call s:SelectBuf(prevbnr)
+    endif
+endfunction
+
+function! s:ToggleEasyBuffer()
+    let winnr = bufwinnr('^easybuffer$')
+    if (winnr == -1)
+        call s:OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+    else
+        call s:CloseEasyBuffer()
+    endif
+endfunction
+
 command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+command! -bang EasyBufferClose call <SID>CloseEasyBuffer()
+command! -bang EasyBufferToggle call <SID>ToggleEasyBuffer()
 command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&lines/2).'sp')
 command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&lines/2).'sp')
 command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&columns/2).'vs')

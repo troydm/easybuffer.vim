@@ -38,6 +38,9 @@ g:easybuffer_bufname    (Default: 'bname' )
     For example: "expand('#'.bnr.':t').'  '.expand('#'.bnr.':p')"
     Note: bnr variable is buffer number and bname variable is buffer name
 
+g:easybuffer_cursorline (Default: 1)
+    Enable or disable highlighting of the current line in easybuffer
+
 ============================================================================================
  2. USAGE                                                         *easybuffer.vim-usage*
 
