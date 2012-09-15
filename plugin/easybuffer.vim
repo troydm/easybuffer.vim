@@ -22,7 +22,7 @@ if !exists("g:easybuffer_bufname")
 endif
 
 if !exists("g:easybuffer_cursorline")
-	let g:easybuffer_cursorline = 1
+    let g:easybuffer_cursorline = 1
 endif
 
 " check for available command
@@ -364,6 +364,7 @@ function! s:OpenEasyBuffer(bang,win)
         let unlisted = 1
     endif
     if winnr < 0
+    set hidden "set hidden allows unsaved buffers
         execute a:win . ' easybuffer'
         setlocal filetype=easybuffer buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
         call setbufvar('%','prevbnr',prevbnr)
@@ -372,7 +373,7 @@ function! s:OpenEasyBuffer(bang,win)
         call s:ListBuffers(unlisted)
         setlocal nomodifiable
         if exists("g:easybuffer_cursorline")
-		    setlocal cursorline
+            setlocal cursorline
         endif
         nnoremap <buffer> <Esc> :echo '' \| call <SID>ClearInput()<CR>
         nnoremap <buffer> d :echo '' \| call <SID>DelBuffer()<CR>
@@ -394,7 +395,31 @@ function! s:OpenEasyBuffer(bang,win)
     endif
 endfunction
 
+function! s:CloseEasyBuffer() 
+    let prevbnr = getbufvar('%','prevbnr')
+    if (prevbnr == -1)
+        if (winnr("$") > 1) 
+            close
+        else
+            echomsg "Cannot close last window"
+        endif
+    else
+        call s:SelectBuf(prevbnr)
+    endif
+endfunction
+
+function! s:ToggleEasyBuffer()
+    let winnr = bufwinnr('^easybuffer$')
+    if (winnr == -1)
+        call s:OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+    else
+        call s:CloseEasyBuffer()
+    endif
+endfunction
+
 command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+command! -bang EasyBufferClose call <SID>CloseEasyBuffer()
+command! -bang EasyBufferToggle call <SID>ToggleEasyBuffer()
 command! -bang EasyBufferHorizontal call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&lines/2).'sp')
 command! -bang EasyBufferHorizontalBelow call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&lines/2).'sp')
 command! -bang EasyBufferVertical call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.(&columns/2).'vs')
