@@ -341,9 +341,9 @@ function! s:ListBuffers(unlisted)
             let bufft = s:StrCenter('-',maxftwidth)
         endif
         call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
-		if (bnr == prevbnr)
-			call cursor(line('$'),0)
-		endif
+        if (bnr == prevbnr)
+            call cursor(line('$'),0)
+        endif
     endfor
     call setbufvar('%','keydict',keydict)
     match none
@@ -371,6 +371,9 @@ function! s:OpenEasyBuffer(bang,win)
         call setbufvar('%','unlisted',unlisted)
         call s:ListBuffers(unlisted)
         setlocal nomodifiable
+        if exists("g:easybuffer_cursorline")
+		    setlocal cursorline
+        endif
         nnoremap <buffer> <Esc> :echo '' \| call <SID>ClearInput()<CR>
         nnoremap <buffer> d :echo '' \| call <SID>DelBuffer()<CR>
         nnoremap <buffer> D :echo '' \| call <SID>WipeoutBuffer()<CR>
@@ -389,9 +392,6 @@ function! s:OpenEasyBuffer(bang,win)
         call setbufvar('%','unlisted',unlisted)
         call s:Refresh()
     endif
-	if exists("g:easybuffer_cursorline")
-		setlocal cursorline
-	endif
 endfunction
 
 command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
