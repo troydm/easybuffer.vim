@@ -21,6 +21,10 @@ if !exists("g:easybuffer_bufname")
     let g:easybuffer_bufname = "bname"
 endif
 
+if !exists("g:easybuffer_cursorline")
+	let g:easybuffer_cursorline = 1
+endif
+
 " check for available command
 let g:easybuffer_keep = ''
 if exists(":keepalt")
@@ -381,6 +385,9 @@ function! s:OpenEasyBuffer(bang,win)
         call setbufvar('%','unlisted',unlisted)
         call s:Refresh()
     endif
+	if exists("g:easybuffer_cursorline")
+		setlocal cursorline
+	endif
 endfunction
 
 command! -bang EasyBuffer call <SID>OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
