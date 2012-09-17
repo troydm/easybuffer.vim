@@ -191,7 +191,7 @@ function! s:KeyPressed(k)
     let matchedk = 0
     let notmatchedbnr = []
     for k in keys(keydict)
-        if match(k,inputl) != -1
+        if match(k,'^'.inputl) != -1
             let matches += 1
             let matchedk = k
         else
@@ -230,7 +230,7 @@ function! s:NumberPressed(n)
     let matchedbnr = 0
     let notmatchedbnr = []
     for bnr in bnrlist
-        if match(''.bnr,input) != -1
+        if match(''.bnr,'^'.input) != -1
             let matches += 1
             let matchedbnr = bnr
         else
@@ -289,7 +289,7 @@ function! s:ListBuffers(unlisted)
                     let kn = 0
                     for k in g:easybuffer_chars
                         if kn
-                            let key = keydict[:-2].k
+                            let key = key[:-2].k
                             let kn = 0
                             break
                         endif
