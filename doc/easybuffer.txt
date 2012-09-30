@@ -31,11 +31,13 @@ g:easybuffer_chars     (Default: ['a','s','f','q','w','e','z','x','c','v'] )
     List of characters to use as a key switching characters
     Note: you can't use uppercase letters and 'r' and 'd' letters as switch characters
 
+                                                         *g:easybuffer_bufname*
 g:easybuffer_bufname    (Default: 'bname' )
     Customize buffer name display in quick switch buffer 
     For example: "expand('#'.bnr.':t').'  '.expand('#'.bnr.':p')"
     Note: bnr variable is buffer number and bname variable is buffer name
 
+                                                         *g:easybuffer_cursorline*
 g:easybuffer_cursorline (Default: 1)
     Enable or disable highlighting of the current line in easybuffer
 
