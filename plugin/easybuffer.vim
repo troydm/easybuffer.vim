@@ -367,7 +367,7 @@ function! s:OpenEasyBuffer(bang,win)
         "set hidden allows unsaved buffers
         set hidden 
         execute a:win . ' easybuffer'
-        setlocal filetype=easybuffer buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
+        setlocal filetype=easybuffer buftype=nofile bufhidden=wipe nobuflisted noswapfile nonumber nowrap
         call setbufvar('%','prevbnr',prevbnr)
         call setbufvar('%','win',a:win)
         call setbufvar('%','unlisted',unlisted)
