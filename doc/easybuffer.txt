@@ -21,7 +21,8 @@ easybuffer.vim - is a simple plugin to quickly switch between buffers using corr
 keys or buffer numbers displayed in easybuffer quick switch window  
 
 Platform: 
-    only unix based operating systems are supported, might work on Windows too
+    only unix based operating systems are supported
+    works on windows too but there might be some minor bugs
 
 ============================================================================================
  2. CONFIGURATION                                        *easybuffer.vim-configuration*
