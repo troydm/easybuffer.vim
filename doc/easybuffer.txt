@@ -1,10 +1,10 @@
-easybuffer.vim for Vim version 7.0+   Last change: 16 September, 2012
+easybuffer.vim for Vim version 7.0+   Last change: 13 February, 2013
 
 Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-Version: 0.1.3
+Version: 0.1.4
 Description: easybuffer.vim is a simple plugin to quickly
 switch between buffers by just pressing keys 
-Last Change: 16 September, 2012
+Last Change: 13 February, 2013
 License: Vim License (see :help license)
 Website: https://github.com/troydm/easybuffer.vim
 
@@ -41,6 +41,28 @@ g:easybuffer_bufname    (Default: 'bname' )
                                                          *g:easybuffer_cursorline*
 g:easybuffer_cursorline (Default: 1)
     Enable or disable highlighting of the current line in easybuffer
+
+                                                         *g:easybuffer_toggle_position*
+g:easybuffer_toggle_position (Default: 'Current')
+    Position of quick switch buffer window when using |EasyBufferToggle|
+    Can be |Current|, |Horizontal|, |HorizontalBelow|, |Vertical|, |VerticalRight| 
+
+                                                         *g:easybuffer_show_header*
+g:easybuffer_show_header (Default: 1)
+    If enabled 2 line help header is added to quick switch buffer
+
+                                                         *g:easybuffer_horizontal_height*
+g:easybuffer_horizontal_height (Default: '&lines/2')
+    Horizontal quick switch buffer height expression
+
+                                                         *g:easybuffer_vertical_width*
+g:easybuffer_vertical_width (Default: '&columns/2')
+    Vertical quick switch buffer width expression
+
+                                                         *g:easybuffer_use_zoomwintab*
+g:easybuffer_use_zoomwintab (Default: 0)
+    If enabled and zoomwintab plugin present automaticly zooms in when 
+    opening quick switch buffer and zooms out when closing it or selecting a buffer
 
 ============================================================================================
  2. USAGE                                                         *easybuffer.vim-usage*

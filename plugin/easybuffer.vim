@@ -1,9 +1,9 @@
 " easybuffer.vim - plugin to quickly switch between buffers
 " Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-" Version: 0.1.3
+" Version: 0.1.4
 " Description: easybuffer.vim is a simple plugin to quickly
 " switch between buffers by just pressing keys 
-" Last Change: 16 September, 2012
+" Last Change: 13 February, 2013
 " License: Vim License (see :help license)
 " Website: https://github.com/troydm/easybuffer.vim
 "
@@ -25,6 +25,26 @@ endif
 if !exists("g:easybuffer_cursorline")
     let g:easybuffer_cursorline = 1
 endif
+
+if !exists("g:easybuffer_toggle_position")
+    let g:easybuffer_toggle_position = 'Current'
+endif
+
+if !exists("g:easybuffer_show_header")
+    let g:easybuffer_show_header = 1
+endif
+
+if !exists("g:easybuffer_horizontal_height")
+    let g:easybuffer_horizontal_height = '&lines/2'
+endif
+
+if !exists("g:easybuffer_vertical_width")
+    let g:easybuffer_vertical_width = '&columns/2'
+endif
+
+if !exists("g:easybuffer_use_zoomwintab")
+    let g:easybuffer_use_zoomwintab = 0
+endif
 " }}}
 
 " check for available command {{{
@@ -39,13 +59,13 @@ endif
 " }}}
 
 " commands {{{1
-command! -bang EasyBuffer call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+command! -bang EasyBuffer call easybuffer#OpenEasyBufferCurrent('<bang>')
 command! -bang EasyBufferClose call easybuffer#CloseEasyBuffer()
-command! -bang EasyBufferToggle call easybuffer#ToggleEasyBuffer()
-command! -bang EasyBufferHorizontal call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.(&lines/2).'sp')
-command! -bang EasyBufferHorizontalBelow call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&lines/2).'sp')
-command! -bang EasyBufferVertical call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.(&columns/2).'vs')
-command! -bang EasyBufferVerticalRight call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.'belowright '.(&columns/2).'vs')
+command! -bang EasyBufferToggle call easybuffer#ToggleEasyBuffer('<bang>')
+command! -bang EasyBufferHorizontal call easybuffer#OpenEasyBufferHorizontal('<bang>')
+command! -bang EasyBufferHorizontalBelow call easybuffer#OpenEasyBufferHorizontalBelow('<bang>')
+command! -bang EasyBufferVertical call easybuffer#OpenEasyBufferVertical('<bang>')
+command! -bang EasyBufferVerticalRight call easybuffer#OpenEasyBufferVerticalRight('<bang>')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

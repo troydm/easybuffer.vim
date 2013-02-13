@@ -1,9 +1,9 @@
 " easybuffer.vim - plugin to quickly switch between buffers
 " Maintainer: Dmitry "troydm" Geurkov <d.geurkov@gmail.com>
-" Version: 0.1.3
+" Version: 0.1.4
 " Description: easybuffer.vim is a simple plugin to quickly
 " switch between buffers by just pressing keys 
-" Last Change: 16 September, 2012
+" Last Change: 13 February, 2013
 " License: Vim License (see :help license)
 " Website: https://github.com/troydm/easybuffer.vim
 "
@@ -51,6 +51,9 @@ endfunction
 
 " buffer related functions {{{
 function! s:SelectBuf(bnr)
+    if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded && b:zoomwintab
+        silent! ZoomWinTabOut
+    endif
     if !(getbufvar('%','win') =~ ' edit')
         bwipeout!
     endif
@@ -64,7 +67,12 @@ function! s:SelectBuf(bnr)
 endfunction
 
 function! s:DelBuffer()
-    if line('.') > 2
+    if g:easybuffer_show_header
+        let header = 2
+    else
+        let header = 0
+    endif
+    if line('.') > header
         let bnr = str2nr(split(getline('.'),'\s\+')[0])
         if bufexists(bnr)
             if !getbufvar(bnr, "&modified")
@@ -82,7 +90,12 @@ function! s:DelBuffer()
 endfunction
 
 function! s:WipeoutBuffer()
-    if line('.') > 2
+    if g:easybuffer_show_header
+        let header = 2
+    else
+        let header = 0
+    endif
+    if line('.') > header
         let bnr = str2nr(split(getline('.'),'\s\+')[0])
         if bufexists(bnr)
             exe ''.bnr.'bwipeout!'
@@ -98,8 +111,13 @@ endfunction
 
 " utility functions {{{
 function! s:GotoBuffer(bnr)
-    if line('$') > 2
-        for i in range(3,line('$'))
+    if g:easybuffer_show_header
+        let header = 2
+    else
+        let header = 0
+    endif
+    if line('$') > header
+        for i in range(1+header,line('$'))
             let bnr = str2nr(split(getline(i),'\s\+')[0])
             if bnr == a:bnr
                 exe 'normal! '.i.'G0^'
@@ -133,6 +151,11 @@ endfunction
 function! s:EnterPressed()
     let input = getbufvar('%','inputn')
     let inputk = getbufvar('%','inputk')
+    if g:easybuffer_show_header
+        let header = 2
+    else
+        let header = 0
+    endif
     if !empty(inputk)
         let inputkl = tolower(inputk)
         let keydict = getbufvar('%','keydict')
@@ -168,7 +191,7 @@ function! s:EnterPressed()
         match none
         call setbufvar('%','inputn',input)
         call setbufvar('%','inputk','')
-    elseif line('.') > 2
+    elseif line('.') > header
         let bnr = str2nr(split(getline('.'),'\s\+')[0])
         match none
         call s:SelectBuf(bnr)
@@ -253,7 +276,6 @@ endfunction
 
 " easybuffer related functions {{{
 function! s:ListBuffers(unlisted)
-    call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
     let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val) && getbufvar(v:val,'&filetype') != 'easybuffer'")
     if !a:unlisted
         let bnrlist = filter(bnrlist, "buflisted(v:val)")
@@ -267,7 +289,10 @@ function! s:ListBuffers(unlisted)
             let maxftwidth = len(getbufvar(bnr,'&filetype'))
         endif
     endfor
-    call append(1,'<BufNr> <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
+    if g:easybuffer_show_header
+        call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
+        call append(1,'<BufNr> <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
+    endif
     for bnr in bnrlist
         let key = ''
         let keyok = 0
@@ -343,6 +368,12 @@ function! s:ListBuffers(unlisted)
             call cursor(line('$'),0)
         endif
     endfor
+    if !g:easybuffer_show_header
+        let cursor = getpos(".")
+        normal! gg"_dd
+        let cursor[1] = cursor[1] - 1
+        call setpos('.', cursor)
+    endif
     call setbufvar('%','keydict',keydict)
     match none
 endfunction
@@ -371,6 +402,9 @@ function! easybuffer#OpenEasyBuffer(bang,win)
         call setbufvar('%','prevbnr',prevbnr)
         call setbufvar('%','win',a:win)
         call setbufvar('%','unlisted',unlisted)
+        if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded
+            call setbufvar('%','zoomwintab',gettabvar(tabpagenr(),'zoomwintab') == '')
+        endif
         call s:ListBuffers(unlisted)
         setlocal nomodifiable
         if g:easybuffer_cursorline
@@ -395,9 +429,15 @@ function! easybuffer#OpenEasyBuffer(bang,win)
         call setbufvar('%','unlisted',unlisted)
         call s:Refresh()
     endif
+    if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded && b:zoomwintab
+        silent! ZoomWinTabIn
+    endif
 endfunction
 
 function! easybuffer#CloseEasyBuffer() 
+    if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded && b:zoomwintab
+        silent! ZoomWinTabOut
+    endif
     let prevbnr = getbufvar('%','prevbnr')
     if !bufexists(prevbnr)
         let prevbnr = -1
@@ -416,14 +456,35 @@ function! easybuffer#CloseEasyBuffer()
     endif
 endfunction
 
-function! easybuffer#ToggleEasyBuffer()
+function! easybuffer#ToggleEasyBuffer(bang)
     let winnr = bufwinnr('^easybuffer$')
     if winnr == -1
-        call easybuffer#OpenEasyBuffer('<bang>',g:easybuffer_keep.'edit')
+        exe 'call easybuffer#OpenEasyBuffer'.g:easybuffer_toggle_position.'(a:bang)'
     else
         call easybuffer#CloseEasyBuffer()
     endif
 endfunction
+
+function! easybuffer#OpenEasyBufferCurrent(bang)
+    call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.'edit')
+endfunction
+
+function! easybuffer#OpenEasyBufferHorizontal(bang)
+    exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.(".g:easybuffer_horizontal_height.").'sp')"
+endfunction
+
+function! easybuffer#OpenEasyBufferHorizontalBelow(bang)
+    exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.'belowright '.(".g:easybuffer_horizontal_height.").'sp')"
+endfunction
+
+function! easybuffer#OpenEasyBufferVertical(bang)
+    exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.(".g:easybuffer_vertical_width.").'vs')"
+endfunction
+
+function! easybuffer#OpenEasyBufferVerticalRight(bang)
+    exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.'belowright '.(".g:easybuffer_vertical_width.").'vs')"
+endfunction
+
 " }}}
 " }}}
 
