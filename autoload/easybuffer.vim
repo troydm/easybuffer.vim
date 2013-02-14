@@ -431,6 +431,9 @@ function! easybuffer#OpenEasyBuffer(bang,win)
     endif
     if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded && b:zoomwintab
         silent! ZoomWinTabIn
+        let pos = getpos('.')
+        exe 'normal! '.line('$').'z^'
+        call setpos('.',pos)
     endif
 endfunction
 
