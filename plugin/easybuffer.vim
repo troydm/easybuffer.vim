@@ -14,10 +14,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " options {{{
-if !exists("g:easybuffer_chars")
-    let g:easybuffer_chars = ['a','s','f','w','e','z','x','c','v']
-endif
-
 if !exists("g:easybuffer_bufname")
     let g:easybuffer_bufname = "bname"
 endif

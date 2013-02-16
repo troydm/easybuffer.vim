@@ -163,13 +163,13 @@ function! s:EnterPressed()
             if k == inputkl
                 if char2nr(inputk[len(inputk)-1]) == char2nr(inputkl[len(inputkl)-1])
                     match none
-                    call s:SelectBuf(keydict[k])
+                    call s:SelectBuf(k)
                 else
                     let inputk = ''
                     match none
                     call setbufvar('%','inputk',inputk)
                     call setbufvar('%','inputn',inputk)
-                    call s:GotoBuffer(keydict[k])
+                    call s:GotoBuffer(k)
                 endif
                 return
             endif
@@ -192,9 +192,10 @@ function! s:EnterPressed()
         call setbufvar('%','inputn',input)
         call setbufvar('%','inputk','')
     elseif line('.') > header
-        let bnr = str2nr(split(getline('.'),'\s\+')[0])
+        let k = str2nr(split(getline('.'),'\s\+')[0])
+        let keydict = getbufvar('%','keydict')
         match none
-        call s:SelectBuf(bnr)
+        call s:SelectBuf(keydict[k])
     else
         match none
         call setbufvar('%','inputn','')
@@ -214,7 +215,7 @@ function! s:KeyPressed(k)
             let matches += 1
             let matchedk = k
         else
-            call add(notmatchedbnr,keydict[k])
+            call add(notmatchedbnr,k)
         endif
     endfor
     if matches == 1
@@ -242,38 +243,6 @@ function! s:KeyPressed(k)
     call setbufvar('%','inputn','')
 endfunction
 
-function! s:NumberPressed(n)
-    let input = getbufvar('%','inputn').a:n
-    let bnrlist = getbufvar('%','bnrlist')
-    let matches = 0
-    let matchedbnr = 0
-    let notmatchedbnr = []
-    for bnr in bnrlist
-        if match(''.bnr,'^'.input) != -1
-            let matches += 1
-            let matchedbnr = bnr
-        else
-            call add(notmatchedbnr,bnr)
-        endif
-    endfor
-    if matches == 1
-        match none
-        call s:SelectBuf(matchedbnr)
-        return
-    elseif matches == 0
-        let input = ''
-    endif
-    if len(input) > 0
-        call s:HighlightNotMatchedBnr(notmatchedbnr)
-        echo 'select bufnr: '.input
-    else
-        match none
-    endif
-    call setbufvar('%','inputn',input)
-    call setbufvar('%','inputk','')
-endfunction
-" }}}
-
 " easybuffer related functions {{{
 function! s:ListBuffers(unlisted)
     let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val) && getbufvar(v:val,'&filetype') != 'easybuffer'")
@@ -290,44 +259,15 @@ function! s:ListBuffers(unlisted)
         endif
     endfor
     if g:easybuffer_show_header
-        call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
-        call append(1,'<BufNr> <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
+        call setline(1, 'easybuffer - buffer list (press key to select the buffer, press d to delete or D to wipeout buffer)')
+        call append(1,'<Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
     endif
+    let keynr = 0
     for bnr in bnrlist
         let key = ''
-        let keyok = 0
-        while !keyok 
-            for k in g:easybuffer_chars
-                if !has_key(keydict, key.k)
-                    let key = key.k
-                    let keyok = 1
-                    break
-                endif
-            endfor
-            if !keyok
-                if len(key) == 0
-                    let key = g:easybuffer_chars[0]
-                else
-                    let kb = key[len(key)-1]
-                    let kn = 0
-                    for k in g:easybuffer_chars
-                        if kn
-                            let key = key[:-2].k
-                            let kn = 0
-                            break
-                        endif
-                        if k == kb
-                            let kn = 1
-                        endif
-                    endfor
-                    if kn 
-                        let key .= g:easybuffer_chars[0]
-                    endif
-                endif
-            endif
-        endwhile
-        let keydict[key] = bnr
-        let key = s:StrCenter(key,5)
+        let keydict[keynr] = bnr
+        let key = s:StrCenter(keynr,5)
+        let keynr += 1
         let bnrs = s:StrCenter(''.bnr,7)
         let mode = ''
         let bufmodified = getbufvar(bnr, "&mod")
@@ -363,7 +303,7 @@ function! s:ListBuffers(unlisted)
             let bname = '[No Name]'
             let bufft = s:StrCenter('-',maxftwidth)
         endif
-        call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
+        call append(line('$'),key.'  '.mode.'  '.bufft.'  '.bname)
         if bnr == prevbnr
             call cursor(line('$'),0)
         endif
@@ -417,11 +357,7 @@ function! easybuffer#OpenEasyBuffer(bang,win)
         nnoremap <silent> <buffer> q :call easybuffer#CloseEasyBuffer()<CR>
         nnoremap <silent> <buffer> <Enter> :call <SID>EnterPressed()<CR>
         for i in range(10)
-            exe 'nnoremap <silent> <buffer> '.i." :call <SID>NumberPressed(".i.")<CR>"
-        endfor
-        for k in g:easybuffer_chars
-            exe 'nnoremap <silent> <buffer> '.k." :call <SID>KeyPressed('".k."')<CR>"
-            exe 'nnoremap <silent> <buffer> '.toupper(k)." :call <SID>KeyPressed('".toupper(k)."')<CR>"
+            exe 'nnoremap <silent> <buffer> '.i." :call <SID>KeyPressed('".i."')<CR>"
         endfor
     else
         exe g:easybuffer_keep.winnr . 'wincmd w'
