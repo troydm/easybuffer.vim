@@ -45,6 +45,10 @@ endif
 if !exists("g:easybuffer_use_zoomwintab")
     let g:easybuffer_use_zoomwintab = 0
 endif
+
+if !exists("g:easybuffer_use_sequence")
+    let g:easybuffer_use_sequence = 0
+endif
 " }}}
 
 " check for available command {{{

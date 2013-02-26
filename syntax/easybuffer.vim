@@ -24,6 +24,7 @@ syntax match EasyBufferTitle /\%1lto select the buffer/
 syntax match EasyBufferTitle /\%1lto delete/ 
 syntax match EasyBufferTitle /\%1lto wipeout buffer/ 
 syntax match EasyBufferComment /buffer list/ 
+syntax match EasyBufferColumn /<\zsSeqNr\ze>/ 
 syntax match EasyBufferColumn /<\zsBufNr\ze>/ 
 syntax match EasyBufferColumn /<\zsFiletype\ze>/ 
 syntax match EasyBufferColumn /<\zsBufName\ze>/ 

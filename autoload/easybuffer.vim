@@ -58,6 +58,9 @@ function! s:SelectBuf(bnr)
         bwipeout!
     endif
     let prevbnr = getbufvar('%','prevbnr') 
+    if !bufexists(prevbnr)
+        let prevbnr = -1
+    endif
     if bufnr('%') != prevbnr
         exe g:easybuffer_keep.prevbnr.'buffer'
     endif
@@ -73,13 +76,15 @@ function! s:DelBuffer()
         let header = 0
     endif
     if line('.') > header
-        let bnr = str2nr(split(getline('.'),'\s\+')[0])
+        let bnr = s:BufNr(line('.'))
         if bufexists(bnr)
             if !getbufvar(bnr, "&modified")
                 exe ''.bnr.'bdelete'
                 setlocal modifiable
                 normal! dd
                 setlocal nomodifiable
+                call s:RemoveBuffer(bnr)
+                echo ''
             else
                 echo "buffer is modified"
             endif
@@ -96,12 +101,14 @@ function! s:WipeoutBuffer()
         let header = 0
     endif
     if line('.') > header
-        let bnr = str2nr(split(getline('.'),'\s\+')[0])
+        let bnr = s:BufNr(line('.'))
         if bufexists(bnr)
             exe ''.bnr.'bwipeout!'
             setlocal modifiable
             normal! dd
             setlocal nomodifiable
+            call s:RemoveBuffer(bnr)
+            echo ''
         else
             echo "no such buffer"
         endif
@@ -110,6 +117,44 @@ endfunction
 " }}}
 
 " utility functions {{{
+function! s:BufNr(line)
+    if g:easybuffer_show_header
+        let header = 2
+    else
+        let header = 0
+    endif
+    let bnrlist = getbufvar('%','bnrlist')
+    return bnrlist[a:line - header - 1]
+endfunction
+
+function! s:RemoveValue(dict,bnr)
+    let dict = getbufvar('%',a:dict)
+    for k in keys(dict)
+        if dict[k] == a:bnr
+            call remove(dict,k)
+            break
+        endif
+    endfor
+    call setbufvar('%',a:dict,dict)
+endfunction
+
+function! s:RemoveBuffer(bnr)
+    if g:easybuffer_use_sequence
+        call s:RemoveValue('bnrseqdict',a:bnr)
+    endif
+    call s:RemoveValue('keydict',a:bnr)
+    let bnrlist = getbufvar('%','bnrlist')
+    let i = 0
+    for bi in bnrlist
+        if bi == a:bnr
+            call remove(bnrlist,i)
+            break
+        endif
+        let i += 1
+    endfor
+    call setbufvar('%','bnrlist',bnrlist)
+endfunction
+
 function! s:GotoBuffer(bnr)
     if g:easybuffer_show_header
         let header = 2
@@ -117,13 +162,13 @@ function! s:GotoBuffer(bnr)
         let header = 0
     endif
     if line('$') > header
-        for i in range(1+header,line('$'))
-            let bnr = str2nr(split(getline(i),'\s\+')[0])
-            if bnr == a:bnr
-                exe 'normal! '.i.'G0^'
-                break
-            endif
-        endfor
+        let bnrlist = getbufvar('%','bnrlist')
+        let ind = index(bnrlist,a:bnr)
+        if ind != -1
+            let i = header + 1 + ind
+            exe 'normal! '.i.'G0^'
+        endif
+        echo ''
     endif
 endfunction
 
@@ -137,9 +182,21 @@ function! s:HighlightNotMatchedBnr(bnrs)
     let p = ''
     let i = 0
     if len(a:bnrs) == 0 | return | endif
+    if g:easybuffer_use_sequence
+        let bnrseqdict = getbufvar('%','bnrseqdict')
+    endif
     for bnr in a:bnrs
         if i != 0 | let p .= '\|' | endif
-        let p .= ''.bnr
+        if g:easybuffer_use_sequence
+            for i in keys(bnrseqdict)
+                if bnrseqdict[i] == bnr
+                    let p .= ''.i
+                    break
+                endif
+            endfor
+        else
+            let p .= ''.bnr
+        endif
         let i += 1
     endfor
     let p = '/^\s*\('.p.'\)\s.*$/'
@@ -180,19 +237,30 @@ function! s:EnterPressed()
         call setbufvar('%','inputn','')
     elseif !empty(input)
         let bnrlist = getbufvar('%','bnrlist')
-        for bnr in bnrlist
-            if (''.bnr) == input
-                match none
-                call s:SelectBuf(bnr)
-                return
-            endif
-        endfor
+        if g:easybuffer_use_sequence
+            let bnrseqdict = getbufvar('%','bnrseqdict')
+            for i in keys(bnrseqdict)
+                if (''.i) == input
+                    match none
+                    call s:SelectBuf(bnrseqdict[i])
+                    return
+                endif
+            endfor
+        else
+            for bnr in bnrlist
+                if (''.bnr) == input
+                    match none
+                    call s:SelectBuf(bnr)
+                    return
+                endif
+            endfor
+        endif
         let input = ''
         match none
         call setbufvar('%','inputn',input)
         call setbufvar('%','inputk','')
     elseif line('.') > header
-        let bnr = str2nr(split(getline('.'),'\s\+')[0])
+        let bnr = s:BufNr(line('.'))
         match none
         call s:SelectBuf(bnr)
     else
@@ -230,6 +298,7 @@ function! s:KeyPressed(k)
         endif
         return
     elseif matches == 0
+        echo 'invalid key: '.input
         let input = ''
     endif
     if len(input) > 0
@@ -248,24 +317,45 @@ function! s:NumberPressed(n)
     let matches = 0
     let matchedbnr = 0
     let notmatchedbnr = []
-    for bnr in bnrlist
-        if match(''.bnr,'^'.input) != -1
-            let matches += 1
-            let matchedbnr = bnr
-        else
-            call add(notmatchedbnr,bnr)
-        endif
-    endfor
+    if g:easybuffer_use_sequence
+        let bnrseqdict = getbufvar('%','bnrseqdict')
+        for i in keys(bnrseqdict)
+            if match(''.i,'^'.input) != -1
+                let matches += 1
+                let matchedbnr = bnrseqdict[i]
+            else
+                call add(notmatchedbnr,bnrseqdict[i])
+            endif
+        endfor
+    else
+        for bnr in bnrlist
+            if match(''.bnr,'^'.input) != -1
+                let matches += 1
+                let matchedbnr = bnr
+            else
+                call add(notmatchedbnr,bnr)
+            endif
+        endfor
+    endif
     if matches == 1
         match none
         call s:SelectBuf(matchedbnr)
         return
     elseif matches == 0
+        if g:easybuffer_use_sequence
+            echo 'invalid seqnr: '.input
+        else
+            echo 'invalid bufnr: '.input
+        endif
         let input = ''
     endif
     if len(input) > 0
         call s:HighlightNotMatchedBnr(notmatchedbnr)
-        echo 'select bufnr: '.input
+        if g:easybuffer_use_sequence
+            echo 'select seqnr: '.input
+        else
+            echo 'select bufnr: '.input
+        endif
     else
         match none
     endif
@@ -284,6 +374,7 @@ function! s:ListBuffers(unlisted)
     call setbufvar('%','bnrlist',bnrlist)
     let prevbnr = getbufvar('%','prevbnr') 
     let maxftwidth = 10
+    let bnrseqdict = {}
     for bnr in bnrlist
         if len(getbufvar(bnr,'&filetype')) > maxftwidth
             let maxftwidth = len(getbufvar(bnr,'&filetype'))
@@ -291,8 +382,14 @@ function! s:ListBuffers(unlisted)
     endfor
     if g:easybuffer_show_header
         call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
-        call append(1,'<BufNr> <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
+        if g:easybuffer_use_sequence
+            let numtitle = '<SeqNr>'
+        else
+            let numtitle = '<BufNr>'
+        endif
+        call append(1,numtitle.' <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
     endif
+    let i = 1
     for bnr in bnrlist
         let key = ''
         let keyok = 0
@@ -328,7 +425,6 @@ function! s:ListBuffers(unlisted)
         endwhile
         let keydict[key] = bnr
         let key = s:StrCenter(key,5)
-        let bnrs = s:StrCenter(''.bnr,7)
         let mode = ''
         let bufmodified = getbufvar(bnr, "&mod")
         if !buflisted(bnr)
@@ -363,10 +459,17 @@ function! s:ListBuffers(unlisted)
             let bname = '[No Name]'
             let bufft = s:StrCenter('-',maxftwidth)
         endif
+        if g:easybuffer_use_sequence
+            let bnrs = s:StrCenter(''.i,7)
+            let bnrseqdict[i] = bnr
+        else
+            let bnrs = s:StrCenter(''.bnr,7)
+        endif
         call append(line('$'),bnrs.' '.key.'  '.mode.'  '.bufft.'  '.bname)
         if bnr == prevbnr
             call cursor(line('$'),0)
         endif
+        let i += 1
     endfor
     if !g:easybuffer_show_header
         let cursor = getpos(".")
@@ -375,6 +478,9 @@ function! s:ListBuffers(unlisted)
         call setpos('.', cursor)
     endif
     call setbufvar('%','keydict',keydict)
+    if g:easybuffer_use_sequence
+        call setbufvar('%','bnrseqdict',bnrseqdict)
+    endif
     match none
 endfunction
 

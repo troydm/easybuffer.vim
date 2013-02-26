@@ -64,6 +64,10 @@ g:easybuffer_use_zoomwintab (Default: 0)
     If enabled and zoomwintab plugin present automaticly zooms in when 
     opening quick switch buffer and zooms out when closing it or selecting a buffer
 
+                                                         *g:easybuffer_use_sequence*
+g:easybuffer_use_sequence (Default: 0)
+    If enabled sequence numbers are displayed instead of buffer numbers in quick switch buffer
+
 ============================================================================================
  2. USAGE                                                         *easybuffer.vim-usage*
 
