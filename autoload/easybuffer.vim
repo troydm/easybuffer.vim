@@ -61,7 +61,7 @@ function! s:SelectBuf(bnr)
     if !bufexists(prevbnr)
         let prevbnr = -1
     endif
-    if bufnr('%') != prevbnr
+    if bufnr('%') != prevbnr && prevbnr != -1
         exe g:easybuffer_keep.prevbnr.'buffer'
     endif
     if prevbnr != a:bnr
