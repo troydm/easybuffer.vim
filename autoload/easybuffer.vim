@@ -365,6 +365,135 @@ endfunction
 " }}}
 
 " easybuffer related functions {{{
+function! s:HeaderText(txt,sortmode)
+    if b:sortmode ==# a:sortmode
+        return '<'.a:txt.g:easybuffer_sort_asc_chr.'>'
+    elseif b:sortmode ==# toupper(a:sortmode)
+        return '<'.a:txt.g:easybuffer_sort_desc_chr.'>'
+    else
+        return '<'.a:txt.'>'
+    endif
+endfunction
+
+function! s:BufMode(bnr)
+    let mode = ''
+    if !buflisted(a:bnr)
+        let mode .= 'u'
+    endif
+    if bufwinnr('%') == bufwinnr(a:bnr)
+        let mode .= '%'
+    elseif bufnr('#') == a:bnr
+        let mode .= '#'
+    endif
+    if winbufnr(bufwinnr(a:bnr)) == a:bnr
+        let mode .= 'a'
+    else
+        let mode .= 'h'
+    endif
+    if !getbufvar(a:bnr, "&modifiable")
+        let mode .= '-'
+    elseif getbufvar(a:bnr, "&readonly")
+        let mode .= '='
+    endif
+    if getbufvar(a:bnr, "&modified")
+        let mode .= '+'
+    endif
+    return mode
+endfunction
+
+" sort compare functions
+function! s:StrCmp(s1,s2)
+    if a:s1 ==# a:s2
+        return 0
+    else
+        let s1l = strlen(a:s1)
+        let s2l = strlen(a:s2)
+        let s = s1l > s2l ? s2l : s1l
+        let i = 0
+        let cmp = 0
+        while i < s
+            let sn1 = char2nr(a:s1[i])
+            let sn2 = char2nr(a:s2[i])
+            let cmp = sn1 == sn2 ? 0 : sn1 > sn2 ? 1 : -1
+            if cmp != 0
+                return cmp
+            endif
+            let i += 1
+        endwhile
+        return cmp
+    endif
+endfunction
+
+function! s:CmpBnr(b1, b2)
+    return a:b1 == a:b2 ? 0 : a:b1 > a:b2 ? 1 : -1
+endfunction
+
+function! s:CmpBnrDesc(b1, b2)
+    return a:b1 == a:b2 ? 0 : a:b1 > a:b2 ? -1 : 1
+endfunction
+
+function! s:CmpBufName(b1, b2)
+    let n1 = fnamemodify(bufname(a:b1),':t')
+    let n2 = fnamemodify(bufname(a:b2),':t')
+    return s:StrCmp(n1, n2) 
+endfunction
+
+function! s:CmpBufNameDesc(b1, b2)
+    let n1 = fnamemodify(bufname(a:b1),':t')
+    let n2 = fnamemodify(bufname(a:b2),':t')
+    return -s:StrCmp(n1, n2) 
+endfunction
+
+function! s:CmpFiletype(b1, b2)
+    let f1 = getbufvar(a:b1,'&filetype')
+    if empty(f1) | let f1 = ' ' | endif
+    let f2 = getbufvar(a:b2,'&filetype')
+    if empty(f2) | let f2 = ' ' | endif
+    return s:StrCmp(f1, f2) 
+endfunction
+
+function! s:CmpFiletypeDesc(b1, b2)
+    let f1 = getbufvar(a:b1,'&filetype')
+    if empty(f1) | let f1 = ' ' | endif
+    let f2 = getbufvar(a:b2,'&filetype')
+    if empty(f2) | let f2 = ' ' | endif
+    return -s:StrCmp(f1, f2) 
+endfunction
+
+function! s:CmpBufMode(b1, b2)
+    return s:StrCmp(s:BufMode(a:b1), s:BufMode(a:b2)) 
+endfunction
+
+function! s:CmpBufModeDesc(b1, b2)
+    return -s:StrCmp(s:BufMode(a:b1), s:BufMode(a:b2)) 
+endfunction
+
+function! s:SortBuffers(bnrlist)
+    if b:sortmode ==# "b"
+        return sort(a:bnrlist,"<SID>CmpBnr")
+    elseif b:sortmode ==# "B"
+        return sort(a:bnrlist,"<SID>CmpBnrDesc")
+    elseif b:sortmode ==# "n"
+        return sort(a:bnrlist,"<SID>CmpBufName")
+    elseif b:sortmode ==# "N"
+        return sort(a:bnrlist,"<SID>CmpBufNameDesc")
+    elseif b:sortmode ==# "f"
+        return sort(a:bnrlist,"<SID>CmpFiletype")
+    elseif b:sortmode ==# "F"
+        return sort(a:bnrlist,"<SID>CmpFiletypeDesc")
+    elseif b:sortmode ==# "m"
+        return sort(a:bnrlist,"<SID>CmpBufMode")
+    elseif b:sortmode ==# "M"
+        return sort(a:bnrlist,"<SID>CmpBufModeDesc")
+    elseif b:sortmode ==# "s"
+        return a:bnrlist
+    elseif b:sortmode ==# "S"
+        return reverse(a:bnrlist)
+    else
+        return a:bnrlist
+    endif
+endfunction
+
 function! s:ListBuffers(unlisted)
     let bnrlist = filter(range(1,bufnr("$")), "bufexists(v:val) && getbufvar(v:val,'&filetype') != 'easybuffer'")
     if !a:unlisted
@@ -383,11 +512,15 @@ function! s:ListBuffers(unlisted)
     if g:easybuffer_show_header
         call setline(1, 'easybuffer - buffer list (press key or bufnr to select the buffer, press d to delete or D to wipeout buffer)')
         if g:easybuffer_use_sequence
-            let numtitle = '<SeqNr>'
+            let numtitle = s:HeaderText('SeqNr','s')
         else
-            let numtitle = '<BufNr>'
+            let numtitle = s:HeaderText('BufNr','b')
         endif
-        call append(1,numtitle.' <Key>  <Mode>  '.s:StrCenter('<Filetype>',maxftwidth).'  <BufName>')
+        call append(1,numtitle.' '.'<Key>'.'  '.s:HeaderText('Mode','m').'  '
+                    \.s:StrCenter(s:HeaderText('Filetype','f'),maxftwidth).'  '.s:HeaderText('BufName','n'))
+    endif
+    if b:sortmode !=# ''
+        let bnrlist = s:SortBuffers(bnrlist)
     endif
     let i = 1
     for bnr in bnrlist
@@ -425,30 +558,7 @@ function! s:ListBuffers(unlisted)
         endwhile
         let keydict[key] = bnr
         let key = s:StrCenter(key,5)
-        let mode = ''
-        let bufmodified = getbufvar(bnr, "&mod")
-        if !buflisted(bnr)
-            let mode .= 'u'
-        endif
-        if bufwinnr('%') == bufwinnr(bnr)
-            let mode .= '%'
-        elseif bufnr('#') == bnr
-            let mode .= '#'
-        endif
-        if winbufnr(bufwinnr(bnr)) == bnr
-            let mode .= 'a'
-        else
-            let mode .= 'h'
-        endif
-        if !getbufvar(bnr, "&modifiable")
-            let mode .= '-'
-        elseif getbufvar(bnr, "&readonly")
-            let mode .= '='
-        endif
-        if getbufvar(bnr, "&modified")
-            let mode .= '+'
-        endif
-        let mode = ' '.s:StrRight(mode,5)
+        let mode = ' '.s:StrRight(s:BufMode(bnr),5)
         let bname = bufname(bnr)
         if len(bname) > 0
             let bname = eval(g:easybuffer_bufname)
@@ -508,6 +618,7 @@ function! easybuffer#OpenEasyBuffer(bang,win)
         call setbufvar('%','prevbnr',prevbnr)
         call setbufvar('%','win',a:win)
         call setbufvar('%','unlisted',unlisted)
+        call setbufvar('%','sortmode',g:easybuffer_sort_mode)
         if g:easybuffer_use_zoomwintab && g:zoomwintab_loaded
             call setbufvar('%','zoomwintab',gettabvar(tabpagenr(),'zoomwintab') == '')
         endif
@@ -522,6 +633,17 @@ function! easybuffer#OpenEasyBuffer(bang,win)
         nnoremap <silent> <buffer> R :call <SID>Refresh()<CR>
         nnoremap <silent> <buffer> q :call easybuffer#CloseEasyBuffer()<CR>
         nnoremap <silent> <buffer> <Enter> :call <SID>EnterPressed()<CR>
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_seq_asc_mapping." :let b:sortmode = 's' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_seq_desc_mapping." :let b:sortmode = 'S' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufnr_asc_mapping." :let b:sortmode = 'b' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufnr_desc_mapping." :let b:sortmode = 'B' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufname_asc_mapping." :let b:sortmode = 'n' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufname_desc_mapping." :let b:sortmode = 'N' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_filetype_asc_mapping." :let b:sortmode = 'f' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_filetype_desc_mapping." :let b:sortmode = 'F' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufmode_asc_mapping." :let b:sortmode = 'm' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_bufmode_desc_mapping." :let b:sortmode = 'M' \\| call <SID>Refresh()<CR>"
+        exe "nnoremap <silent> <buffer> ".g:easybuffer_sort_clear_mapping." :let b:sortmode = '' \\| call <SID>Refresh()<CR>"
         for i in range(10)
             exe 'nnoremap <silent> <buffer> '.i." :call <SID>NumberPressed(".i.")<CR>"
         endfor

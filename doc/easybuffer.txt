@@ -68,6 +68,62 @@ g:easybuffer_use_zoomwintab (Default: 0)
 g:easybuffer_use_sequence (Default: 0)
     If enabled sequence numbers are displayed instead of buffer numbers in quick switch buffer
 
+                                                         *g:easybuffer_sort_mode*
+g:easybuffer_sort_mode (Default: '')
+    Default sort mode, can be |s| |S| |b| |B| |n| |N| |m| |M| |f| |F| respectively
+
+                                                         *g:easybuffer_sort_asc_chr*
+g:easybuffer_sort_asc_chr (Default: '▾')
+    Character to represent ascending sorting in header
+
+                                                         *g:easybuffer_sort_desc_chr*
+g:easybuffer_sort_desc_chr (Default: '▴')
+    Character to represent descending sorting in header
+
+                                                         *g:easybuffer_sort_clear_mapping*
+g:easybuffer_sort_clear_mapping (Default: ',,')
+    Key mapping to clear sorting
+
+                                                         *g:easybuffer_sort_seq_asc_mapping*
+g:easybuffer_sort_seq_asc_mapping (Default: ',s')
+    Key mapping to sort by sequence ascendingly
+
+                                                         *g:easybuffer_sort_seq_desc_mapping*
+g:easybuffer_sort_seq_desc_mapping (Default: ',S')
+    Key mapping to sort by sequence descendingly
+
+                                                         *g:easybuffer_sort_bufnr_asc_mapping*
+g:easybuffer_sort_bufnr_asc_mapping (Default: ',b')
+    Key mapping to sort by buffer number ascendingly
+
+                                                         *g:easybuffer_sort_bufnr_desc_mapping*
+g:easybuffer_sort_bufnr_desc_mapping (Default: ',B')
+    Key mapping to sort by buffer number descendingly
+
+                                                         *g:easybuffer_sort_bufname_asc_mapping*
+g:easybuffer_sort_bufname_asc_mapping (Default: ',n')
+    Key mapping to sort by buffer name ascendingly
+
+                                                         *g:easybuffer_sort_bufname_desc_mapping*
+g:easybuffer_sort_bufname_desc_mapping (Default: ',N')
+    Key mapping to sort by buffer name descendingly
+
+                                                         *g:easybuffer_sort_bufmode_asc_mapping*
+g:easybuffer_sort_bufmode_asc_mapping (Default: ',m')
+    Key mapping to sort by buffer mode ascendingly
+
+                                                         *g:easybuffer_sort_bufmode_desc_mapping*
+g:easybuffer_sort_bufmode_desc_mapping (Default: ',M')
+    Key mapping to sort by buffer mode descendingly
+
+                                                         *g:easybuffer_sort_filetype_asc_mapping*
+g:easybuffer_sort_filetype_asc_mapping (Default: ',f')
+    Key mapping to sort by filetype ascendingly
+
+                                                         *g:easybuffer_sort_filetype_desc_mapping*
+g:easybuffer_sort_filetype_desc_mapping (Default: ',F')
+    Key mapping to sort by filetype descendingly
+
 ============================================================================================
  2. USAGE                                                         *easybuffer.vim-usage*
 

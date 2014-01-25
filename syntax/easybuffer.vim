@@ -24,12 +24,12 @@ syntax match EasyBufferTitle /\%1lto select the buffer/
 syntax match EasyBufferTitle /\%1lto delete/ 
 syntax match EasyBufferTitle /\%1lto wipeout buffer/ 
 syntax match EasyBufferComment /buffer list/ 
-syntax match EasyBufferColumn /<\zsSeqNr\ze>/ 
-syntax match EasyBufferColumn /<\zsBufNr\ze>/ 
-syntax match EasyBufferColumn /<\zsFiletype\ze>/ 
-syntax match EasyBufferColumn /<\zsBufName\ze>/ 
-syntax match EasyBufferColumn /<\zsKey\ze>/ 
-syntax match EasyBufferColumn /<\zsMode\ze>/ 
+syntax match EasyBufferColumn /<\zsSeqNr.\?\ze>/ 
+syntax match EasyBufferColumn /<\zsBufNr.\?\ze>/ 
+syntax match EasyBufferColumn /<\zsFiletype.\?\ze>/ 
+syntax match EasyBufferColumn /<\zsBufName.\?\ze>/ 
+syntax match EasyBufferColumn /<\zsKey.\?\ze>/ 
+syntax match EasyBufferColumn /<\zsMode.\?\ze>/ 
 syntax match EasyBufferBufNr /\d\+/ contained 
 syntax match EasyBufferKey /\l\+/ contained
 syntax match EasyBufferKeyBufNr /^\s*\d\+\s\+\S\+\s/ contains=EasyBufferBufNr,EasyBufferKey

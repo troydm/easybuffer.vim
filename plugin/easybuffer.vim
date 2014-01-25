@@ -49,6 +49,66 @@ endif
 if !exists("g:easybuffer_use_sequence")
     let g:easybuffer_use_sequence = 0
 endif
+
+if !exists("g:easybuffer_sort_clear_mapping")
+    let g:easybuffer_sort_clear_mapping = ",,"
+endif
+
+if !exists("g:easybuffer_sort_bufnr_asc_mapping")
+    let g:easybuffer_sort_bufnr_asc_mapping = ",b"
+endif
+
+if !exists("g:easybuffer_sort_bufnr_desc_mapping")
+    let g:easybuffer_sort_bufnr_desc_mapping = ",B"
+endif
+
+if !exists("g:easybuffer_sort_seq_asc_mapping")
+    let g:easybuffer_sort_seq_asc_mapping = ",s"
+endif
+
+if !exists("g:easybuffer_sort_seq_desc_mapping")
+    let g:easybuffer_sort_seq_desc_mapping = ",S"
+endif
+
+if !exists("g:easybuffer_sort_bufname_asc_mapping")
+    let g:easybuffer_sort_bufname_asc_mapping = ",n"
+endif
+
+if !exists("g:easybuffer_sort_bufname_desc_mapping")
+    let g:easybuffer_sort_bufname_desc_mapping = ",N"
+endif
+
+if !exists("g:easybuffer_sort_bufmode_asc_mapping")
+    let g:easybuffer_sort_bufmode_asc_mapping = ",m"
+endif
+
+if !exists("g:easybuffer_sort_bufmode_desc_mapping")
+    let g:easybuffer_sort_bufmode_desc_mapping = ",M"
+endif
+
+if !exists("g:easybuffer_sort_filetype_asc_mapping")
+    let g:easybuffer_sort_filetype_asc_mapping = ",f"
+endif
+
+if !exists("g:easybuffer_sort_filetype_desc_mapping")
+    let g:easybuffer_sort_filetype_desc_mapping = ",F"
+endif
+
+if !exists("g:easybuffer_sort_mode")
+    let g:easybuffer_sort_mode = ""
+endif
+
+if !exists("g:easybuffer_sort_asc_chr")
+    let g:easybuffer_sort_asc_chr = "▾"
+endif
+
+if !exists("g:easybuffer_sort_desc_chr")
+    let g:easybuffer_sort_desc_chr = "▴"
+endif
+
+if !exists("g:easybuffer_bufname")
+    let g:easybuffer_bufname = "bname"
+endif
 " }}}
 
 " check for available command {{{
