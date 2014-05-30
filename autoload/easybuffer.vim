@@ -596,7 +596,7 @@ endfunction
 
 function! s:Refresh()
     setlocal modifiable
-    silent! normal! ggdGG
+    silent! normal! gg"_dG
     call s:ListBuffers(getbufvar('%','unlisted'))
     setlocal nomodifiable
 endfunction
