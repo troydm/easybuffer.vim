@@ -81,7 +81,7 @@ function! s:DelBuffer()
             if !getbufvar(bnr, "&modified")
                 exe ''.bnr.'bdelete'
                 setlocal modifiable
-                normal! dd
+                normal! "_dd
                 setlocal nomodifiable
                 call s:RemoveBuffer(bnr)
                 echo ''
@@ -105,7 +105,7 @@ function! s:WipeoutBuffer()
         if bufexists(bnr)
             exe ''.bnr.'bwipeout!'
             setlocal modifiable
-            normal! dd
+            normal! "_dd
             setlocal nomodifiable
             call s:RemoveBuffer(bnr)
             echo ''
