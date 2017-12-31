@@ -38,6 +38,10 @@ if !exists("g:easybuffer_horizontal_height")
     let g:easybuffer_horizontal_height = '&lines/2'
 endif
 
+if !exists("g:easybuffer_botright_height")
+    let g:easybuffer_botright_height  = 9
+endif
+
 if !exists("g:easybuffer_vertical_width")
     let g:easybuffer_vertical_width = '&columns/2'
 endif
@@ -130,6 +134,7 @@ command! -bang EasyBufferHorizontal call easybuffer#OpenEasyBufferHorizontal('<b
 command! -bang EasyBufferHorizontalBelow call easybuffer#OpenEasyBufferHorizontalBelow('<bang>')
 command! -bang EasyBufferVertical call easybuffer#OpenEasyBufferVertical('<bang>')
 command! -bang EasyBufferVerticalRight call easybuffer#OpenEasyBufferVerticalRight('<bang>')
+command! -bang EasyBufferBotRight call easybuffer#OpenEasyBufferBotRight('<bang>')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

@@ -59,6 +59,10 @@ g:easybuffer_horizontal_height (Default: '&lines/2')
 g:easybuffer_vertical_width (Default: '&columns/2')
     Vertical quick switch buffer width expression
 
+                                                         *g:easybuffer_botright_height*
+g:easybuffer_botright_height (Default: 9)
+    Botright quick switch buffer height 
+
                                                          *g:easybuffer_use_zoomwintab*
 g:easybuffer_use_zoomwintab (Default: 0)
     If enabled and zoomwintab plugin present automaticly zooms in when 
@@ -162,5 +166,9 @@ g:easybuffer_sort_filetype_desc_mapping (Default: ',F')
                                                                   *EasyBufferVerticalRight*
 :EasyBufferVerticalRight[!]
     Same as |EasyBuffer| only displays quick switch buffer in a new vertical window on right
+
+                                                                  *EasyBufferBotRight*
+:EasyBufferBotRight[!]
+    Same as |EasyBuffer| only displays quick switch buffer in a new horizontal window on botright
 
  vim:tw=78:ts=8:ft=help:norl:
