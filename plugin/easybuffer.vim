@@ -134,6 +134,7 @@ command! -bang EasyBufferHorizontal call easybuffer#OpenEasyBufferHorizontal('<b
 command! -bang EasyBufferHorizontalBelow call easybuffer#OpenEasyBufferHorizontalBelow('<bang>')
 command! -bang EasyBufferVertical call easybuffer#OpenEasyBufferVertical('<bang>')
 command! -bang EasyBufferVerticalRight call easybuffer#OpenEasyBufferVerticalRight('<bang>')
+command! -bang EasyBufferBotRight call easybuffer#OpenEasyBufferBotRight('<bang>')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
