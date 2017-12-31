@@ -169,6 +169,6 @@ g:easybuffer_sort_filetype_desc_mapping (Default: ',F')
 
                                                                   *EasyBufferBotRight*
 :EasyBufferBotRight[!]
-    Same as |EasyBuffer| only displays quick switch buffer in a new vertical window on botright
+    Same as |EasyBuffer| only displays quick switch buffer in a new horizontal window on botright
 
  vim:tw=78:ts=8:ft=help:norl:
