@@ -38,6 +38,10 @@ if !exists("g:easybuffer_horizontal_height")
     let g:easybuffer_horizontal_height = '&lines/2'
 endif
 
+if !exists("g:easybuffer_botright_height")
+    let g:easybuffer_botright_height  = '9'
+endif
+
 if !exists("g:easybuffer_vertical_width")
     let g:easybuffer_vertical_width = '&columns/2'
 endif

@@ -716,6 +716,15 @@ function! easybuffer#OpenEasyBufferVerticalRight(bang)
     exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.'belowright '.(".g:easybuffer_vertical_width.").'vs')"
 endfunction
 
+function! easybuffer#OpenEasyBufferBotRight(bang)
+    let winnr  = bufwinnr('^easybuffer$')
+    if winnr == -1
+        exe "call easybuffer#OpenEasyBuffer(a:bang,g:easybuffer_keep.'botright '.(".g:easybuffer_botright_height.").'sp')"
+    else
+        call easybuffer#CloseEasyBuffer()
+    endif
+endfunction
+
 " }}}
 " }}}
 
