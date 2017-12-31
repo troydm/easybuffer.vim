@@ -39,7 +39,7 @@ if !exists("g:easybuffer_horizontal_height")
 endif
 
 if !exists("g:easybuffer_botright_height")
-    let g:easybuffer_botright_height  = '9'
+    let g:easybuffer_botright_height  = 9
 endif
 
 if !exists("g:easybuffer_vertical_width")
